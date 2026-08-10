@@ -9,7 +9,7 @@ const readMomory = async () => {
     }
 }
 
-export const memoryResult = async (query, k) => {
+export const memoryResult = async (query, k,RELEVANCE_THRESHOLD=0.30) => {
     try {
         // create the embedding first for the user query
         let queryEmbeddings = await createEmbeddings(query)
@@ -28,7 +28,7 @@ export const memoryResult = async (query, k) => {
         });
         // 4. Highest similarity first
         res.sort((a, b) => b.score - a.score);
-        return res.slice(0, k);
+        return res.filter((item)=>item.score >=RELEVANCE_THRESHOLD).slice(0, k);
 
 
     } catch (err) {
