@@ -1,6 +1,7 @@
 import { encodingForModel } from "js-tiktoken";
-import { writeFileData } from "../services/file.service.js";
+import { updateFileData, writeFileData } from "../services/file.service.js";
 import OPEN_AI_CLIENT from "./openai.utils.js";
+import { checkDuplicacy } from "../services/memory.service.js";
 const encoder = encodingForModel("gpt-4o");
 
 function countToken(content) {
@@ -130,16 +131,33 @@ For a request to forget/delete memory:
     })
     let res = JSON.parse(agent.output_text)
     if (res.should_store == true) {
-        console.log("this info will be stored in embedding forms in user json file", res)
-        let fileOutput = await writeFileData('./user.json',
-            {
-                'id': Date.now(),
+
+        // check the duplicacy first if already stored in the embeddings then update else insert
+
+        let duplicayOutput = await checkDuplicacy(res.memory, 0.50);
+
+        /*
+        1.  if duplicacy fount then update  else insert 
+        */
+        // if found duplicate 
+        console.log("duplicayOutput", duplicayOutput)
+        if (duplicayOutput.isDuplicate == true) {
+            //  update the memory
+            let isUpdated = await updateFileData(duplicayOutput.match.id, {
                 'memory_type': res.memory_type,
                 'memory': res.memory
-            }
+            })
+        } else {
+            let fileOutput = await writeFileData('./user.json',
+                {
+                    'id': Date.now(),
+                    'memory_type': res.memory_type,
+                    'memory': res.memory,
+                    'created_at': Date.now()
+                }
+            );
+        }
 
-
-        );
     }
     return agent.output_text;
 

@@ -23,32 +23,32 @@ async function askQuestion(firstinteraction = false) {
         })
 
         // let finalContext =  limitTokenBasesMessage(context,400)
-        // let fileWritten = await isMemorable(userQuery)
-        let queryResult = await memoryResult(userQuery, 2)
+        let fileWritten = await isMemorable(userQuery)
+        // let queryResult = await memoryResult(userQuery, 2)
 
         // console.log(queryResult, "queryResult");
-        let memoryContext = queryResult.length > 0 ? queryResult.map((item) => {
-            return `-${item.memory}`;
-        }).join('\n'): 'No relevant long-term memories found.'
-        // console.log("memory context is ", memoryContext)
-        let finalContext = [
-            context[0],
-            {
-                'role': "system",
-                "content":
-                    `
-                Relevant long-term memories about the user:
-                ${memoryContext}
+        // let memoryContext = queryResult.length > 0 ? queryResult.map((item) => {
+        //     return `-${item.memory}`;
+        // }).join('\n'): 'No relevant long-term memories found.'
+        // // console.log("memory context is ", memoryContext)
+        // let finalContext = [
+        //     context[0],
+        //     {
+        //         'role': "system",
+        //         "content":
+        //             `
+        //         Relevant long-term memories about the user:
+        //         ${memoryContext}
 
-                `
-            },
-             ...context.slice(1)
-        ]
+        //         `
+        //     },
+        //      ...context.slice(1)
+        // ]
 
         // send query to the open ai client
         const assistanceRes = await OPEN_AI_CLIENT.responses.create({
             model: 'gpt-4o-mini',
-            input: finalContext,
+            input: context,
             temperature: 1,
             max_output_tokens: 200
         })
