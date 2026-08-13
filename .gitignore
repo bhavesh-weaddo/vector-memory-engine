@@ -73,3 +73,5 @@ build/Release
 .DS_Store
 .vscode/
 .idea/
+
+services/slinding.js
